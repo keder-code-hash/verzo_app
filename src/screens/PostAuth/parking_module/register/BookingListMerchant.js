@@ -37,7 +37,7 @@ const BookingMerchantList = ({ navigation }) => {
       );
       let otps = await GETCALL("api/get_all_otps", data.token);
       setOtps(otps.responseData.otps);
-      console.log(response.responseData.data[0].bookingDetails);
+      console.log("Booking deetails" + JSON.stringify(response.responseData));
       // setLoader(false);
       if (response.responseData.success) {
         setOrders(response.responseData.data);
@@ -218,10 +218,41 @@ const BookingMerchantList = ({ navigation }) => {
             }}
           >
             {otps.length > 0
-              ? otps.find((otp) => otp.order_id === item._id).otp
+              ? otps.find((otp) => otp.order_id === item._id)?.otp
               : "4231"}
           </Text>
         </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Text
+            onPress={() =>
+              navigation.navigate({
+                name: "QRCodeScanner",
+                params: {
+                  otp:
+                    otps.length > 0
+                      ? otps.find((otp) => otp.order_id === item._id)?.otp
+                      : "4231",
+                },
+              })
+            }
+            style={{
+              color: "red",
+              fontWeight: "bold",
+              fontSize: 20,
+              textAlign: "right",
+            }}
+          >
+            SCAN
+          </Text>
+        </View>
+
         <View style={{ height: 10 }} />
         {item.bookingStatus == "booked" && (
           <>
