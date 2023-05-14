@@ -20,18 +20,29 @@ import {
 import { CameraScreen } from "react-native-camera-kit";
 
 const VeroverQRScannerComponent = ({ navigation, route }) => {
+  const [otpValue, setOtpValue] = useState(route.params.otp);
   const [qrvalue, setQrvalue] = useState("");
   const [opneScanner, setOpneScanner] = useState(false);
 
-  const onOpenlink = () => {
-    // If scanned then function to open URL in Browser
-    Linking.openURL(qrvalue);
-  };
-
-  const onBarcodeScan = (qrvalue) => {
+  const onBarcodeScan = async (qrvalue) => {
     // Called after te successful scanning of QRCode/Barcode
     setQrvalue(qrvalue);
     setOpneScanner(false);
+    if (otpValue === qrvalue) {
+      // // update the status of booking from verfied false to true
+      // const id = route.params.booking_id;
+      // let data = await retrieveData("userdetails");
+      // let payload = {
+      //   bookingId: id,
+      // };
+      // if (data && data.token) {
+      //   await POSTCALL("api/verify-booking", payload, data.token);
+      // }
+      alert("order verified");
+      navigation.navigate("BookingListMerchant");
+    } else {
+      alert("scan again");
+    }
   };
 
   const onOpneScanner = () => {
@@ -88,17 +99,6 @@ const VeroverQRScannerComponent = ({ navigation, route }) => {
         </View>
       ) : (
         <View style={styles.container}>
-          <Text style={styles.titleText}>
-            Barcode and QR Code Scanner using Camera in React Native
-          </Text>
-          <Text style={styles.textStyle}>
-            {qrvalue
-              ? "Scanned Result: " + qrvalue + " " + route.params.otp
-              : ""}
-          </Text>
-          {qrvalue === route.params.otp && qrvalue != ""
-            ? navigation.navigate("BookingListMerchant")
-            : null}
           <TouchableHighlight
             onPress={onOpneScanner}
             style={styles.buttonStyle}
@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 10,
     alignItems: "center",
+    justifyContent: "center",
   },
   titleText: {
     fontSize: 22,

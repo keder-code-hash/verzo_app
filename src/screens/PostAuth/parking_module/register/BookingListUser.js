@@ -220,7 +220,7 @@ const BookingListUser = ({ navigation }) => {
             }}
           >
             {otps.length > 0
-              ? otps.find((otp) => otp.order_id === item._id).otp
+              ? otps.find((otp) => otp.order_id === item._id)?.otp
               : "4231"}
           </Text>
         </View>
