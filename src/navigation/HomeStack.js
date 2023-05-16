@@ -35,6 +35,7 @@ import NotificationPage from "../screens/PostAuth/NotificationPage";
 import SettingPage from "../screens/PostAuth/settingPage";
 import VeroverQRComponent from "../screens/PostAuth/QRCoder";
 import VeroverQRScannerComponent from "../screens/PostAuth/QRScanner";
+import MyDeliveryList from "../screens/PostAuth/parking_module/register/MyDeliveryList";
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +58,7 @@ const Homestack = () => {
         component={BookingListMerchant}
       />
       <Stack.Screen name="BookingListUser" component={BookingListUser} />
+      <Stack.Screen name="MyDeliveryList" component={MyDeliveryList} />
       <Stack.Screen name="UserMenu" component={UserMenu} />
       <Stack.Screen name="ParkingMerchant" component={ParkingMerchant} />
       <Stack.Screen

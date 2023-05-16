@@ -18,8 +18,9 @@ import { GETCALL, POSTCALL } from "../../global/server";
 import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native-gesture-handler";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import DeliveryModal from "./DeliveryModel";
 
-const UserItem = ({ user }) => {
+const UserItem = ({ user, order_id }) => {
   return (
     <TouchableOpacity
       style={{
@@ -34,7 +35,7 @@ const UserItem = ({ user }) => {
           }}
           style={styles.avatar}
         />
-        <Text style={styles.phoneNumber}>{user.phoneNumber}</Text>
+        <Text style={styles.phoneNumber}>{order_id}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -51,9 +52,14 @@ const DryCleanerOrders = ({ navigation }) => {
   const [data, setData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [allUsers, setAllUsers] = React.useState([]);
+  const [currentSelectedOrder, setCurrentSelectedOrder] = React.useState([]);
 
   const showModal = (item) => {
     setSelectedItem(item);
+  };
+
+  const openModal = () => {
+    return selectedItem != null;
   };
 
   const hideModal = () => {
@@ -344,6 +350,7 @@ const DryCleanerOrders = ({ navigation }) => {
             <Text
               onPress={() => {
                 showModal(item._id);
+                setCurrentSelectedOrder(item._id);
               }}
               style={{
                 color: "red",
@@ -513,51 +520,19 @@ const DryCleanerOrders = ({ navigation }) => {
         </ScrollView>
       </View>
       {/* delivery Modal  */}
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={selectedItem !== null}
-        onRequestClose={hideModal}
-      >
-        <View
-          style={{
-            border: 2,
-            borderColor: "red",
-            flex: 1,
-            marginTop: 42,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              alignItems: "flex-end",
-              width: "90%",
-              marginLeft: 20,
-            }}
-          >
-            <TouchableOpacity onPress={hideModal}>
-              <FontAwesome name="times" size={24} color="#f57d7d" />
-            </TouchableOpacity>
-          </View>
-          <View style={{ flex: 8 }}>
-            <ScrollView
-              style={{
-                borderWidth: 1,
-                borderColor: "#615b5b",
-                width: "90%",
-                marginLeft: 20,
-                borderRadius: 12,
-                marginBottom: 15,
-              }}
-            >
-              {allUsers?.map((item, index) => (
-                <UserItem key={index} user={item} />
-              ))}
-            </ScrollView>
-          </View>
-          <View style={{ flex: 1 }}></View>
-        </View>
-      </Modal>
+      {selectedItem === null ? (
+        <></>
+      ) : (
+        <DeliveryModal
+          order_id={currentSelectedOrder}
+          closeModal={hideModal}
+          openModal={openModal}
+          allUsers={allUsers}
+        />
+      )}
+      {/* {selectedItem && (
+        
+      )} */}
     </KeyboardAvoidingView>
   );
 };
@@ -578,26 +553,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.43,
     shadowRadius: 9.51,
     elevation: 15,
-  },
-  userItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#615b5b",
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  userList: {
-    flex: 1,
   },
 });
