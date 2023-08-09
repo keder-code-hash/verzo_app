@@ -1,5 +1,7 @@
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import DropDownPicker from "react-native-dropdown-picker";
+
 import {
   StyleSheet,
   Text,
@@ -22,31 +24,49 @@ import {
 } from "../../state/reducers/DrycleanerReducer";
 
 const DryCleanerList = ({ navigation }) => {
-  const [stateList, setStateList] = React.useState([]);
   const { dryCleaners } = useSelector((state) => state.drycleanerreducer);
-  const pickerRef = useRef();
-  const [selectedState, setSelectedState] = React.useState("");
-  const [cityList, setCityList] = React.useState([]);
-  const [selectedCity, setSelectedCity] = React.useState("");
   const disPatch = useDispatch();
 
-  React.useEffect(() => {
-    if (selectedCity) {
-      fetchDrycleanerList(selectedCity);
-    }
-  }, [selectedCity]);
+  const [openStatePicker, setOpenStatePicker] = useState(false);
+  const [stateValue, setStateValue] = useState(null);
+  const [states, setStates] = useState([]);
 
-  const fetchDrycleanerList = async (selectedCity) => {
-    let data = await retrieveData("userdetails");
-    if (data && data.token) {
-      let response = await GETCALL(
-        `api/search-dry-cleaner?cityName=${selectedCity}`,
-        data.token
-      );
-      console.log(JSON.stringify(response, null, 4));
-      if (response.responseData.success) {
-        disPatch(setDrycleanerList(response.responseData.data));
-      }
+  const [openCityPicker, setOpenCityPicker] = useState(false);
+  const [cityValue, setCityValue] = useState(null);
+  const [cities, setCities] = useState([]);
+
+  const [merchantCity, setMerchantCity] = useState("");
+  const [merchantState, setMerchantState] = useState("");
+
+  const fetchCityList = async () => {
+    const cities = await GETCALL(
+      `api/city-list?country=US&state=${stateValue}`
+    );
+    if (cities) {
+      let temp = [];
+      cities.responseData.forEach((city, index) => {
+        let obj = {
+          label: city.cityName,
+          value: city.cityName,
+        };
+        temp.push(obj);
+      });
+      setCities(temp);
+    }
+  };
+
+  const fetchStateList = async () => {
+    const states = await GETCALL("api/state-list?country=US");
+    if (states) {
+      let temp = [];
+      states.responseData.forEach((state, index) => {
+        let obj = {
+          label: state.stateName,
+          value: state.stateName,
+        };
+        temp.push(obj);
+      });
+      setStates(temp);
     }
   };
 
@@ -56,15 +76,30 @@ const DryCleanerList = ({ navigation }) => {
     }, [])
   );
 
-  const fetchStateList = async () => {
-    let response = await GETCALL("api/state-list");
-    let stateList = response.responseData;
-    setStateList(stateList);
-    console.log("stateList" + JSON.stringify(stateList));
+  React.useEffect(() => {
+    if (merchantCity) {
+      fetchDrycleanerList(merchantCity);
+    }
+  }, [merchantCity]);
 
-    // let cityList = await GETCALL("api/state-list");
-    // let stateList = response.responseData;
-    // setStateList(stateList);
+  React.useEffect(() => {
+    if (merchantState) {
+      fetchCityList();
+    }
+  }, [merchantState]);
+
+  const fetchDrycleanerList = async (selectedCity) => {
+    let data = await retrieveData("userdetails");
+    if (data && data.token && merchantCity !== "" && merchantState !== "") {
+      let response = await GETCALL(
+        `api/search-dry-cleaner?cityName=${selectedCity}`,
+        data.token
+      );
+      console.log(JSON.stringify(response, null, 4));
+      if (response.responseData.success) {
+        disPatch(setDrycleanerList(response.responseData.data));
+      }
+    }
   };
 
   const renderItems = ({ item, index }) => {
@@ -154,99 +189,39 @@ const DryCleanerList = ({ navigation }) => {
       <FocusAwareStatusBar isLightBar={false} isTopSpace={true} />
       <View style={styles.container}>
         <View style={{ margin: 8 }}>
-          <Text
-            style={{
-              fontSize: 20,
-              color: Colors.BLACK,
+          <Text style={{ color: "#000", fontSize: 18 }}>Select State</Text>
+          <View style={{ height: 20 }} />
+          <DropDownPicker
+            open={openStatePicker}
+            value={stateValue}
+            setValue={setStateValue}
+            items={states}
+            setItems={setStates}
+            setOpen={setOpenStatePicker}
+            placeholder={"Select State"}
+            placeholderStyle={{ color: Colors.BLACK }}
+            onSelectItem={async (item) => {
+              setMerchantState(item?.value);
+              // await fetchCityList();
             }}
-          >
-            State
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              pickerRef.current.focus();
-            }}
-            style={{
-              borderColor: Colors.GRAY_MEDIUM,
-              borderWidth: 1,
-              width: "100%",
-              color: "#000000",
-              fontSize: 15,
-              // width: width - 40,
-              borderRadius: 8,
-              marginTop: 5,
-            }}
-          >
-            <Picker
-              selectedValue={selectedState}
-              mode={"dialog"}
-              ref={pickerRef}
-              onValueChange={(itemValue, itemIndex) => {
-                setSelectedState(itemValue);
-                setCityList(stateList[itemIndex].city);
-              }}
-            >
-              {stateList.map((state, index) => {
-                return (
-                  <Picker.Item
-                    style={{
-                      color: Colors.BLACK,
-                    }}
-                    key={index}
-                    label={state.stateName}
-                    value={state.stateSlug}
-                  />
-                );
-              })}
-            </Picker>
-          </TouchableOpacity>
+          />
         </View>
         <View style={{ margin: 8 }}>
-          <Text
-            style={{
-              fontSize: 20,
-              color: Colors.BLACK,
+          <Text style={{ color: "#000", fontSize: 18 }}>Select City</Text>
+          <View style={{ height: 20 }} />
+          <DropDownPicker
+            open={openCityPicker}
+            value={cityValue}
+            setValue={setCityValue}
+            items={cities}
+            setItems={setCities}
+            setOpen={setOpenCityPicker}
+            placeholder={"Select City"}
+            placeholderStyle={{ color: Colors.BLACK }}
+            onSelectItem={(item) => {
+              setMerchantCity(item?.value);
             }}
-          >
-            City
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              pickerRef.current.focus();
-            }}
-            style={{
-              borderColor: Colors.GRAY_MEDIUM,
-              borderWidth: 1,
-              width: "100%",
-              color: "#000000",
-              fontSize: 15,
-              // width: width - 40,
-              borderRadius: 8,
-              marginTop: 5,
-            }}
-          >
-            <Picker
-              selectedValue={selectedCity}
-              mode={"dialog"}
-              ref={pickerRef}
-              onValueChange={(itemValue, itemIndex) => {
-                setSelectedCity(itemValue);
-              }}
-            >
-              {cityList.map((city, index) => {
-                return (
-                  <Picker.Item
-                    style={{
-                      color: Colors.BLACK,
-                    }}
-                    key={index}
-                    label={city.cityName}
-                    value={city.citySlug}
-                  />
-                );
-              })}
-            </Picker>
-          </TouchableOpacity>
+          />
         </View>
         <FlatList
           data={dryCleaners}

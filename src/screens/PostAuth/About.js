@@ -80,6 +80,12 @@ const About = ({ navigation }) => {
     }, [])
   );
 
+  React.useEffect(() => {
+    if (merchantState) {
+      fetchCityList();
+    }
+  }, [merchantState]);
+
   const updateMerchantProfile = async () => {
     setLoader(true);
     let data = await retrieveData("userdetails");
@@ -145,13 +151,11 @@ const About = ({ navigation }) => {
             items={states}
             setItems={setStates}
             setOpen={setOpenStatePicker}
-            zIndex={3000}
-            zIndexInverse={1000}
             placeholder={"Select State"}
             placeholderStyle={{ color: Colors.BLACK }}
             onSelectItem={async (item) => {
               setMerchantState(item?.value);
-              await fetchCityList();
+              // await fetchCityList();
             }}
           />
 
@@ -165,8 +169,6 @@ const About = ({ navigation }) => {
             items={cities}
             setItems={setCities}
             setOpen={setOpenCityPicker}
-            zIndex={3000}
-            zIndexInverse={1000}
             placeholder={"Select City"}
             placeholderStyle={{ color: Colors.BLACK }}
             onSelectItem={(item) => {
