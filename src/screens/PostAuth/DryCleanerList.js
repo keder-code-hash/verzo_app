@@ -89,8 +89,9 @@ const DryCleanerList = ({ navigation }) => {
   }, [merchantState]);
 
   const fetchDrycleanerList = async (selectedCity) => {
+    console.log(selectedCity);
     let data = await retrieveData("userdetails");
-    if (data && data.token && merchantCity !== "" && merchantState !== "") {
+    if (data && data.token && selectedCity !== "") {
       let response = await GETCALL(
         `api/search-dry-cleaner?cityName=${selectedCity}`,
         data.token
@@ -142,7 +143,7 @@ const DryCleanerList = ({ navigation }) => {
           <Text style={styles.label}>Availibility</Text>
         </View>
         <View style={{ height: 10 }} />
-        {item.availability.map((single, index) => {
+        {item?.availability.map((single, index) => {
           return (
             <View
               style={{
