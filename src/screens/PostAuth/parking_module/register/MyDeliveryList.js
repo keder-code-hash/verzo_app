@@ -12,6 +12,30 @@ import {
 import FocusAwareStatusBar from "../../../../components/FocusAwareStatusBar";
 import { Colors } from "../../../../global";
 
+const OrderCard = ({ user, order }) => {
+  return (
+    <View style={styles.card}>
+      <View style={styles.section}>
+        <Text style={styles.title}>User Details:</Text>
+        <Text>Name: {user.name}</Text>
+        <Text>Email: {user.email}</Text>
+        <Text>Address: {user.address}</Text>
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.title}>Order Details:</Text>
+        <Text>Order ID: {order.id}</Text>
+        <Text>Product: {order.product}</Text>
+        <Text>Quantity: {order.quantity}</Text>
+        <Text>Total: ${order.total}</Text>
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Confirm" onPress={showConfirmation} />
+        <Button title="Cancel" onPress={handleCancel} />
+      </View>
+    </View>
+  );
+};
+
 const MyDeliveryList = ({ navigation }) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#4C4C4C" }}>
@@ -81,5 +105,29 @@ const styles = StyleSheet.create({
     color: Colors.WHITE,
     fontSize: 25,
     textAlign: "center",
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 20,
+    margin: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  section: {
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "60%",
   },
 });

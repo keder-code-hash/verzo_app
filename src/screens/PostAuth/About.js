@@ -9,22 +9,76 @@ import {
   Image,
   Alert,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import FocusAwareStatusBar from "../../components/FocusAwareStatusBar";
 import { Colors } from "../../global";
 import Header from "../../components/Header";
-import { POSTCALL } from "../../global/server";
+import { GETCALL, POSTCALL } from "../../global/server";
 import CustomButton from "../../components/CustomButton";
 import { retrieveData } from "../../utils/Storage";
 import Spinner from "react-native-loading-spinner-overlay";
 import { hideMessage, showMessage } from "react-native-flash-message";
 import { useDispatch, useSelector } from "react-redux";
 import { TextInput } from "react-native-gesture-handler";
+import DropDownPicker from "react-native-dropdown-picker";
 
 const About = ({ navigation }) => {
   const [loader, setLoader] = React.useState(false);
   const [about, setAbout] = React.useState("");
   const { dryCleanerProfile } = useSelector((state) => state.drycleanerreducer);
+
+  const [openStatePicker, setOpenStatePicker] = useState(false);
+  const [stateValue, setStateValue] = useState(null);
+  const [states, setStates] = useState([]);
+
+  const [openCityPicker, setOpenCityPicker] = useState(false);
+  const [cityValue, setCityValue] = useState(null);
+  const [cities, setCities] = useState([]);
+
+  const country = "US";
+  const [merchantCity, setMerchantCity] = useState("");
+  const [merchantState, setMerchantState] = useState("");
+
+  const fetchCityList = async () => {
+    const cities = await GETCALL(
+      `api/city-list?country=US&state=${stateValue}`
+    );
+    console.log(cities);
+    if (cities) {
+      let temp = [];
+      cities.responseData.forEach((city, index) => {
+        let obj = {
+          label: city.cityName,
+          value: city.cityName,
+        };
+        temp.push(obj);
+      });
+      setCities(temp);
+    }
+  };
+
+  const fetchStateList = async () => {
+    const states = await GETCALL("api/state-list?country=US");
+    if (states) {
+      let temp = [];
+      states.responseData.forEach((state, index) => {
+        let obj = {
+          label: state.stateName,
+          value: state.stateName,
+        };
+        temp.push(obj);
+      });
+      setStates(temp);
+      console.log(states);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchStateList();
+    }, [])
+  );
 
   const updateMerchantProfile = async () => {
     setLoader(true);
@@ -35,7 +89,15 @@ const About = ({ navigation }) => {
     if (data && data.token) {
       await POSTCALL(
         "api/update-my-dry-cleaner-profile",
-        { acceptItems, availability, images, about },
+        {
+          acceptItems,
+          availability,
+          images,
+          about,
+          merchantCity,
+          merchantState,
+          country,
+        },
         data.token
       );
       setLoader(false);
@@ -73,6 +135,45 @@ const About = ({ navigation }) => {
               setAbout(data);
             }}
           />
+          <View style={{ marginTop: 20 }} />
+          <Text style={{ color: "#000", fontSize: 18 }}>Select State</Text>
+          <View style={{ height: 20 }} />
+          <DropDownPicker
+            open={openStatePicker}
+            value={stateValue}
+            setValue={setStateValue}
+            items={states}
+            setItems={setStates}
+            setOpen={setOpenStatePicker}
+            zIndex={3000}
+            zIndexInverse={1000}
+            placeholder={"Select State"}
+            placeholderStyle={{ color: Colors.BLACK }}
+            onSelectItem={async (item) => {
+              setMerchantState(item?.value);
+              await fetchCityList();
+            }}
+          />
+
+          <View style={{ marginTop: 20 }} />
+          <Text style={{ color: "#000", fontSize: 18 }}>Select City</Text>
+          <View style={{ height: 20 }} />
+          <DropDownPicker
+            open={openCityPicker}
+            value={cityValue}
+            setValue={setCityValue}
+            items={cities}
+            setItems={setCities}
+            setOpen={setOpenCityPicker}
+            zIndex={3000}
+            zIndexInverse={1000}
+            placeholder={"Select City"}
+            placeholderStyle={{ color: Colors.BLACK }}
+            onSelectItem={(item) => {
+              setMerchantCity(item?.value);
+            }}
+          />
+
           <View style={{ height: 20 }} />
           <CustomButton
             customStyle={{

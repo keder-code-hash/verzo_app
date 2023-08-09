@@ -60,6 +60,11 @@ const DryCleanerList = ({ navigation }) => {
     let response = await GETCALL("api/state-list");
     let stateList = response.responseData;
     setStateList(stateList);
+    console.log("stateList" + JSON.stringify(stateList));
+
+    // let cityList = await GETCALL("api/state-list");
+    // let stateList = response.responseData;
+    // setStateList(stateList);
   };
 
   const renderItems = ({ item, index }) => {
