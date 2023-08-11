@@ -130,6 +130,54 @@ const About = ({ navigation }) => {
         <Header />
         <View style={{ marginTop: 20 }} />
         <View style={{ marginHorizontal: 32 }}>
+          <View style={{ marginTop: 20 }} />
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              marginBottom: 10,
+              justifyContent: "center",
+            }}
+          >
+            <View style={{ margin: 8, width: "48%" }}>
+              <Text style={{ color: "#000", fontSize: 18 }}>Select State</Text>
+              <View style={{ height: 20 }} />
+              <DropDownPicker
+                open={openStatePicker}
+                value={stateValue}
+                setValue={setStateValue}
+                items={states}
+                setItems={setStates}
+                setOpen={setOpenStatePicker}
+                placeholder={"Select State"}
+                placeholderStyle={{ color: Colors.BLACK }}
+                onSelectItem={async (item) => {
+                  setMerchantState(item?.value);
+                  // await fetchCityList();
+                }}
+              />
+            </View>
+            <View style={{ margin: 8, width: "48%" }}>
+              <Text style={{ color: "#000", fontSize: 18 }}>Select City</Text>
+              <View style={{ height: 20 }} />
+              <DropDownPicker
+                open={openCityPicker}
+                value={cityValue}
+                setValue={setCityValue}
+                items={cities}
+                setItems={setCities}
+                setOpen={setOpenCityPicker}
+                placeholder={"Select City"}
+                placeholderStyle={{ color: Colors.BLACK }}
+                onSelectItem={(item) => {
+                  setMerchantCity(item?.value);
+                }}
+              />
+            </View>
+          </View>
+          <View style={{ marginTop: 20 }} />
+          <View style={{ marginTop: 20 }} />
+
           <Text style={{ color: "#000", fontSize: 22 }}>About</Text>
           <View style={{ height: 20 }} />
           <TextInput
@@ -139,40 +187,6 @@ const About = ({ navigation }) => {
             }
             onChangeText={(data) => {
               setAbout(data);
-            }}
-          />
-          <View style={{ marginTop: 20 }} />
-          <Text style={{ color: "#000", fontSize: 18 }}>Select State</Text>
-          <View style={{ height: 20 }} />
-          <DropDownPicker
-            open={openStatePicker}
-            value={stateValue}
-            setValue={setStateValue}
-            items={states}
-            setItems={setStates}
-            setOpen={setOpenStatePicker}
-            placeholder={"Select State"}
-            placeholderStyle={{ color: Colors.BLACK }}
-            onSelectItem={async (item) => {
-              setMerchantState(item?.value);
-              // await fetchCityList();
-            }}
-          />
-
-          <View style={{ marginTop: 20 }} />
-          <Text style={{ color: "#000", fontSize: 18 }}>Select City</Text>
-          <View style={{ height: 20 }} />
-          <DropDownPicker
-            open={openCityPicker}
-            value={cityValue}
-            setValue={setCityValue}
-            items={cities}
-            setItems={setCities}
-            setOpen={setOpenCityPicker}
-            placeholder={"Select City"}
-            placeholderStyle={{ color: Colors.BLACK }}
-            onSelectItem={(item) => {
-              setMerchantCity(item?.value);
             }}
           />
 

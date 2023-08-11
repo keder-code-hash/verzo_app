@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   StyleSheet,
   Text,
@@ -8,37 +7,210 @@ import {
   TouchableOpacity,
   Dimensions,
   KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import FocusAwareStatusBar from "../../../../components/FocusAwareStatusBar";
 import { Colors } from "../../../../global";
+import { retrieveData } from "../../../../utils/Storage";
+import { GETCALL, POSTCALL } from "../../../../global/server";
+import { useFocusEffect } from "@react-navigation/native";
+import BackArrowIcon from "../../../../assets/back.svg";
 
-const OrderCard = ({ user, order }) => {
+const RenderBookingCard = ({ item }) => {
+  const [deliveryStatus, setDeliveryStatus] = React.useState(
+    item?.bookingStatus
+  );
+  const [address, setAddress] = React.useState("");
+  const fetchAddress = async () => {
+    let data = await retrieveData("userdetails");
+    if (data && data.token) {
+      let response = await GETCALL(
+        "api/get-my-dry-cleaner-profile",
+        data.token
+      );
+      if (response.responseData.success) {
+        setAddress(response?.responseData?.data?.about);
+      }
+    }
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAddress();
+    }, [])
+  );
   return (
-    <View style={styles.card}>
-      <View style={styles.section}>
-        <Text style={styles.title}>User Details:</Text>
-        <Text>Name: {user.name}</Text>
-        <Text>Email: {user.email}</Text>
-        <Text>Address: {user.address}</Text>
+    <View
+      style={{
+        margin: 15,
+        borderRadius: 5,
+        overflow: "hidden",
+        backgroundColor: Colors.WHITE,
+        padding: 10,
+        ...styles.shadow,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text style={{ color: Colors.BLACK, fontSize: 16, fontWeight: "bold" }}>
+          User Id :
+        </Text>
+        <Text
+          style={{
+            color: Colors.BLACK,
+            fontSize: 16,
+            fontWeight: "bold",
+            textTransform: "capitalize",
+          }}
+        >
+          {item?.assignedTo}
+        </Text>
       </View>
-      <View style={styles.section}>
-        <Text style={styles.title}>Order Details:</Text>
-        <Text>Order ID: {order.id}</Text>
-        <Text>Product: {order.product}</Text>
-        <Text>Quantity: {order.quantity}</Text>
-        <Text>Total: ${order.total}</Text>
+
+      <View style={{ height: 10 }} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text style={{ color: Colors.BLACK, fontSize: 16, fontWeight: "bold" }}>
+          Order Id :
+        </Text>
+        <Text
+          style={{
+            color: Colors.BLACK,
+            fontSize: 16,
+            fontWeight: "bold",
+            textTransform: "capitalize",
+          }}
+        >
+          {item?.orderId}
+        </Text>
       </View>
-      <View style={styles.buttonContainer}>
-        <Button title="Confirm" onPress={showConfirmation} />
-        <Button title="Cancel" onPress={handleCancel} />
+
+      <View style={{ height: 10 }} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text style={{ color: Colors.BLACK, fontSize: 16, fontWeight: "bold" }}>
+          Delivery Status :
+        </Text>
+        <Text
+          style={{
+            color: "blue",
+            fontSize: 16,
+            fontWeight: "bold",
+            textTransform: "capitalize",
+          }}
+        >
+          {deliveryStatus}
+        </Text>
+      </View>
+
+      <View style={{ height: 10 }} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text style={{ color: Colors.BLACK, fontSize: 16, fontWeight: "bold" }}>
+          Dry Cleaner Address :
+        </Text>
+        <Text
+          style={{
+            color: "blue",
+            fontSize: 16,
+            fontWeight: "bold",
+            textTransform: "capitalize",
+          }}
+        >
+          {address || "No Address"}
+        </Text>
+      </View>
+
+      <View style={{ height: 10 }} />
+      <View style={{ height: 1, backgroundColor: Colors.BORDER }} />
+      <View style={{ height: 10 }} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-end",
+        }}
+      >
+        <TouchableOpacity
+          style={[styles.button, { marginRight: 10 }]}
+          onPress={async () => {
+            await POSTCALL("api/delivery/accept-delivery", {
+              assignedTo: item?.assignedTo,
+              orderId: item?.orderId,
+            });
+            setDeliveryStatus("Confirmed");
+          }}
+        >
+          <Text style={styles.buttonText}>ACCEPT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "red" }]}
+          onPress={async () => {
+            await POSTCALL("api/delivery/reject-delivery", {
+              assignedTo: item?.assignedTo,
+              orderId: item?.orderId,
+            });
+            setDeliveryStatus("Cancelled");
+          }}
+        >
+          <Text style={styles.buttonText}>REJECT</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-const MyDeliveryList = ({ navigation }) => {
+const ListEmptyComponent = () => {
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#4C4C4C" }}>
+    <View
+      style={{
+        alignSelf: "center",
+        justifyContent: "center",
+        marginVertical: 20,
+      }}
+    >
+      <Text>No Items Found</Text>
+    </View>
+  );
+};
+
+const MyDeliveryList = ({ navigation }) => {
+  const [deliveryDetails, setDeliveryDetails] = React.useState();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchDeliveryDetails();
+    }, [])
+  );
+
+  const fetchDeliveryDetails = async () => {
+    let data = await retrieveData("userdetails");
+    let bookingData = await POSTCALL("api/delivery/fetch-delivery-assignto", {
+      assignedTo: data?.user._id,
+    });
+    setDeliveryDetails(bookingData?.responseData?.data?.model);
+  };
+  return (
+    <KeyboardAvoidingView style={{ flex: 1 }}>
       <FocusAwareStatusBar isLightBar={false} isTopSpace={true} />
       <View style={styles.screen}>
         <View
@@ -59,7 +231,7 @@ const MyDeliveryList = ({ navigation }) => {
               style={{}}
               onPress={() => navigation.goBack()}
             >
-              <Text>Back</Text>
+              <BackArrowIcon height={"30"} />
             </TouchableOpacity>
             <Text
               style={{
@@ -74,7 +246,11 @@ const MyDeliveryList = ({ navigation }) => {
           </View>
         </View>
       </View>
-      <Text> this is a delivery list</Text>
+      <ScrollView style={{ minHeight: 200, marginTop: 50 }}>
+        {deliveryDetails?.map((deliveryDetail) => {
+          return <RenderBookingCard item={deliveryDetail} />;
+        })}
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -129,5 +305,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "60%",
+  },
+  button: {
+    backgroundColor: "#007AFF", // Customize the background color
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF", // Customize the text color
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
