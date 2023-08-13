@@ -53,23 +53,34 @@ const EditParkingMerchant = (props) => {
   const navigation = useNavigation();
   const { parkingMerchant } = useSelector((state) => state.merchantReducer);
 
-
-  const [openStatePicker, setOpenStatePicker] = useState(false);
-  const [stateValue, setStateValue] = useState(
-    parkingSpacingList.parkingState ? parkingSpacingList.parkingState : null
-  );
+  // const [openStatePicker, setOpenStatePicker] = useState(false);
+  // const [stateValue, setStateValue] = useState(
+  //   parkingSpacingList.parkingState ? parkingSpacingList.parkingState : null
+  // );
   const [stateList, setStateList] = React.useState([]);
   const [stateCityList, setStateCityList] = React.useState([]);
   const [fullData, setFullData] = useState([]);
   let commonStateList = [];
 
-  const [openCityPicker, setOpenCityPicker] = useState(false);
-  const [cityValue, setCityValue] = useState(
-    parkingSpacingList.parkingCity ? parkingSpacingList.parkingCity : null
-  );
+  // const [openCityPicker, setOpenCityPicker] = useState(false);
+  // const [cityValue, setCityValue] = useState(
+  //   parkingSpacingList.parkingCity ? parkingSpacingList.parkingCity : null
+  // );
   const [cityList, setCityList] = React.useState([]);
   // const [parkingSpacingList, setParkingSpacingList] = React.useState({});
   const dispatch = useDispatch();
+
+  const [openStatePicker, setOpenStatePicker] = useState(false);
+  const [stateValue, setStateValue] = useState(null);
+  const [states, setStates] = useState([]);
+
+  const [openCityPicker, setOpenCityPicker] = useState(false);
+  const [cityValue, setCityValue] = useState(null);
+  const [cities, setCities] = useState([]);
+
+  const country = "US";
+  const [merchantCity, setMerchantCity] = useState("");
+  const [merchantState, setMerchantState] = useState("");
 
   const AddMerchant = yup.object().shape({
     name: yup.string().required("Please enter merchant name"),
@@ -87,81 +98,9 @@ const EditParkingMerchant = (props) => {
 
   useFocusEffect(
     useCallback(() => {
-      fetchStateList(parkingSpacingList.parkingState, parkingSpacingList.parkingCity);
-      // selectState(parkingMerchant.parkingCity)
-      // getParkingData();
+      fetchStateList();
     }, [])
   );
-
-  const BASE_URL = "http://165.22.62.238";
-
-  // const fetchStateList = async () => {
-  //   let response = await GETCALL("state-list");
-  //   let stateList = response.responseData;
-  //   commonStateList = [stateList];
-  //   setFullData(stateList);
-  //   // await selectState(parkingMerchant.parkingCity)
-  //   let newArray = stateList.map((state) => {
-  //     const newObj = {
-  //       label: state.stateName,
-  //       value: state.stateSlug,
-  //     };
-  //     return newObj;
-  //   });
-  //   setStateList(newArray);
-  // };
-  const fetchStateList = async (state, city) => {
-    let response = await GETCALL('state-list');
-    let stateCityList = response.responseData;
-    setStateCityList(stateCityList);
-    if (state) {
-      setStateValue(state);
-      let temp = [...response.responseData];
-      let index = temp.findIndex((single, index) => single.stateSlug == state);
-      let filteredCity = temp[index].city;
-      let tempCity = []
-      filteredCity.forEach((singleCity, index) => {
-        let obj = {
-          label: singleCity.cityName,
-          value: singleCity.citySlug
-        }
-        tempCity.push(obj)
-      });
-      setCityList(tempCity)
-    }
-    if (city) {
-      setCityValue(city);
-    }
-    let temp = [];
-    stateCityList.forEach((state, index) => {
-      let obj = {
-        label: state.stateName,
-        value: state.stateSlug
-      }
-      temp.push(obj)
-    });
-    setStateList(temp)
-
-  }
-
-  // const selectState = (item) => {
-  //   // if (fullData.length > 0 ) {
-  //   const newCityList = filter(fullData, (details) =>
-  //     typeof(item) === "string"
-  //       ? item.toString() === details.stateSlug
-  //       : item.value === details.stateSlug
-  //   );
-  //   ("NEW FULL DETAILS", newCityList);
-  //   let newArray = newCityList[0].city.map((city) => {
-  //     const newObj = {
-  //       label: city.cityName,
-  //       value: city.citySlug,
-  //     };
-  //     return newObj;
-  //   });
-  //   setCityList(newArray);
-  //   // }
-  // };
 
   const initialValues = {
     name: "",
@@ -186,7 +125,6 @@ const EditParkingMerchant = (props) => {
         : "",
   });
 
-
   const addMerchantDetails = (values, actions) => {
     if (stateValue !== null) {
       if (cityValue !== null) {
@@ -202,6 +140,48 @@ const EditParkingMerchant = (props) => {
       }
     }
   };
+
+  const fetchCityList = async () => {
+    const cities = await GETCALL(
+      `api/city-list?country=US&state=${stateValue}`
+    );
+    console.log("cities");
+    if (cities) {
+      let temp = [];
+      cities.responseData.forEach((city, index) => {
+        let obj = {
+          label: city.cityName,
+          value: city.cityName,
+        };
+        temp.push(obj);
+      });
+      setCities(temp);
+    }
+  };
+
+  const fetchStateList = async () => {
+    console.log("states");
+    const states = await GETCALL("api/state-list?country=US");
+    console.log("states");
+    if (states) {
+      let temp = [];
+      states.responseData.forEach((state, index) => {
+        let obj = {
+          label: state.stateName,
+          value: state.stateName,
+        };
+        temp.push(obj);
+      });
+      setStates(temp);
+      console.log(states);
+    }
+  };
+
+  React.useEffect(() => {
+    if (merchantState) {
+      fetchCityList();
+    }
+  }, [merchantState]);
 
   return (
     <KeyboardAvoidingView
@@ -341,42 +321,14 @@ const EditParkingMerchant = (props) => {
                         open={openStatePicker}
                         value={stateValue}
                         setValue={setStateValue}
-                        items={stateList}
-                        setItems={setStateList}
+                        items={states}
+                        setItems={setStates}
                         setOpen={setOpenStatePicker}
-                        zIndex={3000}
-                        zIndexInverse={1000}
                         placeholder={"Select State"}
-                        style={{ width: "90%", alignSelf: "center" }}
                         placeholderStyle={{ color: Colors.BLACK }}
-                        dropDownContainerStyle={{
-                          width: "90%",
-                          alignSelf: "center",
-                        }}
-                        // onSelectItem={(item) => {
-                        //   // setStateValue(item);
-                        //   selectState(item);
-                        // }}
-                        onSelectItem={item => {
-                          let temp = [...stateCityList];
-                          let index = temp.findIndex(
-                            (state, index) => state.stateSlug == item.value,
-                          );
-                          let filteredCity = temp[index].city;
-                          let tempCityList = [];
-
-                          filteredCity.forEach((city, index) => {
-                            let obj = {
-                              label: city.cityName,
-                              value: city.citySlug,
-                            };
-                            tempCityList.push(obj);
-                          });
-                          setCityList(tempCityList);
-
-                          // let data = {...profileDetails};
-                          // data.state = item.value;
-                          // setProfileDeatils(data);
+                        onSelectItem={async (item) => {
+                          setMerchantState(item?.value);
+                          // await fetchCityList();
                         }}
                       />
                     </View>
@@ -384,24 +336,16 @@ const EditParkingMerchant = (props) => {
                       <Text style={styles.title}>City</Text>
                       <View style={{ height: 10 }} />
                       <DropDownPicker
-                        zIndex={2000}
                         open={openCityPicker}
-                        setOpen={setOpenCityPicker}
                         value={cityValue}
-                        style={{ width: "90%", alignSelf: "center" }}
                         setValue={setCityValue}
-                        items={cityList}
-                        setItems={setCityList}
+                        items={cities}
+                        setItems={setCities}
+                        setOpen={setOpenCityPicker}
                         placeholder={"Select City"}
                         placeholderStyle={{ color: Colors.BLACK }}
-                        dropDownContainerStyle={{
-                          width: "90%",
-                          alignSelf: "center",
-                        }}
                         onSelectItem={(item) => {
-                          // let data = { ...profileDetails };
-                          // data.city = item.value;
-                          // setProfileDeatils(data)
+                          setMerchantCity(item?.value);
                         }}
                       />
                     </View>
