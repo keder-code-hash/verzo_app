@@ -133,8 +133,18 @@ const DryCleanerList = ({ navigation }) => {
                 source={require("../../assets/man.png")}
               />
             </View>
-            <View style={{ width: 10 }} />
-            <Text style={styles.label}>{item.merchantName}</Text>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginLeft: 10,
+              }}
+            >
+              <Text style={styles.label}>{item.name || "John Doe"}</Text>
+              <Text style={styles.label}>
+                {"Address : " + (item.address || "USA")}
+              </Text>
+            </View>
           </View>
         </View>
 

@@ -29,7 +29,7 @@ const RenderBookingCard = ({ item }) => {
         data.token
       );
       if (response.responseData.success) {
-        setAddress(response?.responseData?.data?.about);
+        setAddress(response?.responseData?.data?.address);
       }
     }
   };

@@ -53,6 +53,7 @@ const MerchantMenu = ({ navigation }) => {
         data.token
       );
       let resData = response.responseData.data;
+      console.log(JSON.stringify(resData, null, 2));
       setLoader(false);
       if (!resData.hasOwnProperty("acceptItems")) {
         disPatch(setDryCleanerProfile({ ...resData, acceptItems: [] }));

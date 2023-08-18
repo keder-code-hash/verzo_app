@@ -37,13 +37,9 @@ const EditProfileScreen = () => {
   const [loader, setLoader] = React.useState(true);
   const navigation = useNavigation();
 
-  const [openStatePicker, setOpenStatePicker] = useState(false);
-  const [stateValue, setStateValue] = useState(null);
   const [stateList, setStateList] = React.useState([]);
   const [stateCityList, setStateCityList] = React.useState([]);
 
-  const [openCityPicker, setOpenCityPicker] = useState(false);
-  const [cityValue, setCityValue] = useState(null);
   const [cityList, setCityList] = React.useState([]);
 
   const onSelect = (country) => {
@@ -100,38 +96,38 @@ const EditProfileScreen = () => {
     }
   };
 
-  const fetchStateList = async (state, city) => {
-    let response = await GETCALL("state-list");
-    let stateCityList = response.responseData;
-    setStateCityList(stateCityList);
-    if (state) {
-      setStateValue(state);
-      let temp = [...response.responseData];
-      let index = temp.findIndex((single, index) => single.stateSlug == state);
-      let filteredCity = temp[index].city;
-      let tempCity = [];
-      filteredCity.forEach((singleCity, index) => {
-        let obj = {
-          label: singleCity.cityName,
-          value: singleCity.citySlug,
-        };
-        tempCity.push(obj);
-      });
-      setCityList(tempCity);
-    }
-    if (city) {
-      setCityValue(city);
-    }
-    let temp = [];
-    stateCityList.forEach((state, index) => {
-      let obj = {
-        label: state.stateName,
-        value: state.stateSlug,
-      };
-      temp.push(obj);
-    });
-    setStateList(temp);
-  };
+  // const fetchStateList = async (state, city) => {
+  //   let response = await GETCALL("state-list");
+  //   let stateCityList = response.responseData;
+  //   setStateCityList(stateCityList);
+  //   if (state) {
+  //     setStateValue(state);
+  //     let temp = [...response.responseData];
+  //     let index = temp.findIndex((single, index) => single.stateSlug == state);
+  //     let filteredCity = temp[index].city;
+  //     let tempCity = [];
+  //     filteredCity.forEach((singleCity, index) => {
+  //       let obj = {
+  //         label: singleCity.cityName,
+  //         value: singleCity.citySlug,
+  //       };
+  //       tempCity.push(obj);
+  //     });
+  //     setCityList(tempCity);
+  //   }
+  //   if (city) {
+  //     setCityValue(city);
+  //   }
+  //   let temp = [];
+  //   stateCityList.forEach((state, index) => {
+  //     let obj = {
+  //       label: state.stateName,
+  //       value: state.stateSlug,
+  //     };
+  //     temp.push(obj);
+  //   });
+  //   setStateList(temp);
+  // };
 
   const updateProfile = async () => {
     setLoader(true);
@@ -226,6 +222,63 @@ const EditProfileScreen = () => {
     }
   };
 
+  const [openStatePicker, setOpenStatePicker] = useState(false);
+  const [stateValue, setStateValue] = useState(null);
+  const [states, setStates] = useState([]);
+
+  const [openCityPicker, setOpenCityPicker] = useState(false);
+  const [cityValue, setCityValue] = useState(null);
+  const [cities, setCities] = useState([]);
+
+  const country = "US";
+  const [merchantCity, setMerchantCity] = useState("");
+  const [merchantState, setMerchantState] = useState("");
+
+  const fetchCityList = async () => {
+    const cities = await GETCALL(
+      `api/city-list?country=US&state=${stateValue}`
+    );
+    console.log(cities);
+    if (cities) {
+      let temp = [];
+      cities.responseData.forEach((city, index) => {
+        let obj = {
+          label: city.cityName,
+          value: city.cityName,
+        };
+        temp.push(obj);
+      });
+      setCities(temp);
+    }
+  };
+
+  const fetchStateList = async () => {
+    const states = await GETCALL("api/state-list?country=US");
+    if (states) {
+      let temp = [];
+      states.responseData.forEach((state, index) => {
+        let obj = {
+          label: state.stateName,
+          value: state.stateName,
+        };
+        temp.push(obj);
+      });
+      setStates(temp);
+      console.log(states);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchStateList();
+    }, [])
+  );
+
+  React.useEffect(() => {
+    if (merchantState) {
+      fetchCityList();
+    }
+  }, [merchantState]);
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: Colors.WHITE }}>
       {/* <Spinner
@@ -378,72 +431,6 @@ const EditProfileScreen = () => {
                     />
                   </View>
                 </View>
-              </View>
-              <View style={styles.textArea}>
-                <Text style={styles.title}>Country</Text>
-                <TextInput
-                  value={"India"}
-                  style={{ ...styles.textInput, color: "#000000" }}
-                  placeholder={"Country"}
-                  editable={false}
-                />
-              </View>
-              <View style={styles.textArea}>
-                <Text style={styles.title}>State</Text>
-                <View style={{ height: 10 }}></View>
-                <DropDownPicker
-                  open={openStatePicker}
-                  value={stateValue}
-                  setValue={setStateValue}
-                  items={stateList}
-                  setItems={setStateList}
-                  setOpen={setOpenStatePicker}
-                  zIndex={3000}
-                  zIndexInverse={1000}
-                  placeholder={"Select State"}
-                  placeholderStyle={{ color: Colors.BLACK }}
-                  onSelectItem={(item) => {
-                    let temp = [...stateCityList];
-                    let index = temp.findIndex(
-                      (state, index) => state.stateSlug == item.value
-                    );
-                    let filteredCity = temp[index].city;
-                    let tempCityList = [];
-
-                    filteredCity.forEach((city, index) => {
-                      let obj = {
-                        label: city.cityName,
-                        value: city.citySlug,
-                      };
-                      tempCityList.push(obj);
-                    });
-                    setCityList(tempCityList);
-
-                    let data = { ...profileDetails };
-                    data.state = item.value;
-                    setProfileDeatils(data);
-                  }}
-                />
-              </View>
-              <View style={styles.textArea}>
-                <Text style={styles.title}>City</Text>
-                <View style={{ height: 10 }}></View>
-                <DropDownPicker
-                  zIndex={2000}
-                  open={openCityPicker}
-                  setOpen={setOpenCityPicker}
-                  value={cityValue}
-                  setValue={setCityValue}
-                  items={cityList}
-                  setItems={setCityList}
-                  placeholder={"Select City"}
-                  placeholderStyle={{ color: Colors.BLACK }}
-                  onSelectItem={(item) => {
-                    let data = { ...profileDetails };
-                    data.city = item.value;
-                    setProfileDeatils(data);
-                  }}
-                />
               </View>
               <View style={styles.textArea}>
                 <Text style={styles.title}>ZIP Code</Text>

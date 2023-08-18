@@ -100,13 +100,14 @@ const UserMenu = ({ navigation }) => {
                 fontWeight: "bold",
                 fontSize: 20,
                 marginVertical: 20,
+                color: "black",
               }}
             >
               Please enter your desirable pincode
             </Text>
             <TextInput
               placeholder="Enter the Zip Code"
-              // value={pushData}
+              placeholderTextColor="black"
               style={{
                 height: 50,
                 borderWidth: 1,

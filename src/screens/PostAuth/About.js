@@ -28,6 +28,13 @@ const About = ({ navigation }) => {
   const [about, setAbout] = React.useState("");
   const { dryCleanerProfile } = useSelector((state) => state.drycleanerreducer);
 
+  const [dryCleanerName, setDryCleanerName] = React.useState(
+    dryCleanerProfile.name || ""
+  );
+  const [dryCleanerAddress, setDryCleanerAddress] = React.useState(
+    dryCleanerProfile.address || ""
+  );
+
   const [openStatePicker, setOpenStatePicker] = useState(false);
   const [stateValue, setStateValue] = useState(null);
   const [states, setStates] = useState([]);
@@ -103,6 +110,8 @@ const About = ({ navigation }) => {
           merchantCity,
           merchantState,
           country,
+          dryCleanerName,
+          dryCleanerAddress,
         },
         data.token
       );
@@ -176,7 +185,37 @@ const About = ({ navigation }) => {
             </View>
           </View>
           <View style={{ marginTop: 20 }} />
-          <View style={{ marginTop: 20 }} />
+
+          <Text style={{ color: "#000", fontSize: 22 }}>Dry Cleaner Name</Text>
+          <View style={{ height: 10 }} />
+          <TextInput
+            style={{
+              height: 50,
+              borderWidth: 1,
+              borderRadius: 10,
+              paddingLeft: 10,
+              color: "black",
+            }}
+            value={dryCleanerName}
+            onChangeText={(data) => {
+              setDryCleanerName(data);
+            }}
+          />
+          <Text style={{ color: "#000", fontSize: 22 }}>Address</Text>
+          <View style={{ height: 10 }} />
+          <TextInput
+            style={{
+              height: 50,
+              borderWidth: 1,
+              borderRadius: 10,
+              paddingLeft: 10,
+              color: "black",
+            }}
+            value={dryCleanerAddress}
+            onChangeText={(data) => {
+              setDryCleanerAddress(data);
+            }}
+          />
 
           <Text style={{ color: "#000", fontSize: 22 }}>About</Text>
           <View style={{ height: 20 }} />

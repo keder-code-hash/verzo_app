@@ -46,29 +46,28 @@ const EditParkingMerchantAbout = (props) => {
     formData.append("parkingSpaceNumber", parkingSlots);
     let data = await retrieveData("userdetails");
 
-
     const sandipKaka = await POSTCALL(
-      'register-parking',
+      "register-parking",
       formData,
       data.token,
-      'media'
+      "media"
     );
 
     setLoader(false);
-      if(sandipKaka.status === 200) {
-        showMessage({
-          message: `Merchant Profile Created Successfully!`,
-          type: 'success',
-          style: {
-            alignItems: 'center',
-          },
-          autoHide: false,
-        });
-        setTimeout(() => {
-          hideMessage();
-          props.navigation.navigate('ParkingDetails');
-        }, 500);
-      }
+    if (sandipKaka.status === 200) {
+      showMessage({
+        message: `Merchant Profile Created Successfully!`,
+        type: "success",
+        style: {
+          alignItems: "center",
+        },
+        autoHide: false,
+      });
+      setTimeout(() => {
+        hideMessage();
+        props.navigation.navigate("ParkingDetails");
+      }, 500);
+    }
   };
 
   return (
@@ -130,6 +129,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     textAlignVertical: "top",
     paddingHorizontal: 10,
-    color: 'black'
+    color: "black",
   },
 });

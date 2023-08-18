@@ -30,7 +30,7 @@ const ParkingMerchantAbout = ({ navigation }) => {
 
   const registerMerchantProfile = async () => {
     setLoader(true);
-    let userData=await retrieveData("userdetails");
+    let userData = await retrieveData("userdetails");
     let formData = new FormData();
     formData.append("parkingName", parkingMerchant.name);
     formData.append("parkingAddress", parkingMerchant.address);
@@ -43,14 +43,14 @@ const ParkingMerchantAbout = ({ navigation }) => {
 
     // console.log("Image", parkingMerchant.image)
     // console.log("FORM DATA", formData);
-    console.log(userData)
+    console.log(userData);
     const sandipKaka = await POSTCALL(
       "api/register-parking",
       formData,
       userData.token,
       "media"
     );
-    console.log("Merchant Data: "+sandipKaka.status);
+    console.log("Merchant Data: " + sandipKaka.status);
     setLoader(false);
     if (sandipKaka.status === 200) {
       showMessage({
@@ -142,6 +142,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     textAlignVertical: "top",
     paddingHorizontal: 10,
-    color: 'black'
+    color: "black",
   },
 });
